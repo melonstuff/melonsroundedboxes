@@ -1,14 +1,11 @@
 --[[
     [Melon's Rounded Boxes]
-
     Want a rounded box that has a material?
     Want it to look nice? 
     Want also to be able to draw any form of rounded polygons?
     WELL YOURE IN LUCK!
-
     Remember to cache your polygons
-    and to credit me :) (https://github.com/melonstuff/melonsroundedboxes/new/main)
-
+    and to credit me :) (https://github.com/garryspins)
     This doesnt stop you from doing stupid stuff, so dont be stupid
 ]]--
 
@@ -22,10 +19,11 @@ local boxes = {}
 ---@arg (y:      number) Y position of the box
 ---@arg (w:      number) W of the box
 ---@arg (h:      number) H of the box
----@arg (bl:number|bool) Should the bottom left be rounded independently, if so how much
----@arg (tl:number|bool) Should the top left be rounded independently, if so how much
----@arg (tr:number|bool) Should the top right be rounded independently, if so how much
----@arg (br:number|bool) Should the bottom right be rounded independently, if so how much
+---@arg (bl:     number) Should the bottom left be rounded independently, if so how much
+---@arg (tl:     number) Should the top left be rounded independently, if so how much
+---@arg (tr:     number) Should the top right be rounded independently, if so how much
+---@arg (br:     number) Should the bottom right be rounded independently, if so how much
+---@arg (detail: number) Number of vertices to put on edges, defaults to 1 for perfect quality, raise this number for how many vertices to skip.
 ----
 ---@return (poly: table) Polygon to be drawn with surface.DrawPoly
 ----
@@ -49,7 +47,7 @@ local boxes = {}
 ---`     surface.DrawPoly(self.background)
 ---` end
 ---`
-function boxes.RoundedBox(radius, x, y, w, h, bl, tl, tr, br)
+function boxes.RoundedBox(radius, x, y, w, h, bl, tl, tr, br, detail)
     local unround = {
         {
             x = x,
@@ -81,11 +79,11 @@ function boxes.RoundedBox(radius, x, y, w, h, bl, tl, tr, br)
         },
     }
 
-    return boxes.RoundedPolygonUV(unround, radius, x, y, w, h)
+    return boxes.RoundedPolygonUV(unround, radius, x, y, w, h, detail)
 end
 
-function boxes.RoundedPolygonUV(poly, default_radius, x,y,w,h)
-    poly = boxes.RoundedPolygon(poly, default_radius)
+function boxes.RoundedPolygonUV(poly, default_radius, x,y,w,h, detail)
+    poly = boxes.RoundedPolygon(poly, default_radius, detail)
 
     for k,v in pairs(poly) do
         v.u = (v.x-x) / w
@@ -95,7 +93,7 @@ function boxes.RoundedPolygonUV(poly, default_radius, x,y,w,h)
     return poly
 end
 
-function boxes.RoundedPolygon(poly, default_radius)
+function boxes.RoundedPolygon(poly, default_radius, detail)
     local points = {}
 
     for k,v in pairs(poly) do
@@ -122,7 +120,7 @@ function boxes.RoundedPolygon(poly, default_radius)
         })
 
         local range = math.deg(ltc_ang - ntc_ang) % 360
-        for i = 1, range - 1 do
+        for i = 1, range - 1, detail or 1 do
             table.insert(points, {
                 x = cx + math.cos(ntc_ang + math.rad(i + 180)) * radius,
                 y = cy + math.sin(ntc_ang + math.rad(i + 180)) * radius,
